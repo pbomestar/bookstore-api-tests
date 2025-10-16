@@ -30,4 +30,32 @@ public class BooksClient {
                 .getList("", Book.class);
     }
 
+    public Response getBookById(int id) {
+        return given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/Books/{id}", id);
+    }
+
+    public Response createBook(Book book) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(book)
+                .when()
+                .post("/Books");
+    }
+
+    public Response updateBook(int id, Book book) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(book)
+                .when()
+                .put("/Books/{id}", id);
+    }
+
+    public Response deleteBook(int id) {
+        return given()
+                .when()
+                .delete("/Books/{id}", id);
+    }
 }
