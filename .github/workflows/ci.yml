@@ -1,0 +1,47 @@
+name: Bookstore API Automation CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run Maven tests
+        run: mvn clean test
+
+      - name: Build Docker image
+        run: docker build -t bookstore-api-tests .
+
+      - name: Run tests in Docker container
+        run: docker run --rm bookstore-api-tests
+
+      - name: Save Docker image as tar
+        run: docker save -o bookstore-api-tests.tar bookstore-api-tests
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bookstore-api-tests-image
+          path: bookstore-api-tests.tar
